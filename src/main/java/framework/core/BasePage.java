@@ -21,14 +21,22 @@ public abstract class BasePage {
     Locator loc = x(xpath); loc.waitFor(); 
     return loc; 
   }
+  
+  // Wait until a given attribute becomes absent (null) or timeout
+  protected void waitUntilAttributeAbsent(Locator loc, String attr, int timeoutMs) {
+  long end = System.currentTimeMillis() + timeoutMs;
+  while (System.currentTimeMillis() < end) {
+    if (loc.getAttribute(attr) == null) return;
+    page.waitForTimeout(100);
+  }
+  throw new AssertionError("Timed out waiting for attribute '" + attr + "' to be absent");
+}
 
   // Actions 
   protected void click(String xpath) {
      waitFor(xpath).click(); 
     }
-  protected void fill(String xpath, String value) {
-    waitFor(xpath).fill(value); 
-  }
+
   protected void pressEnter(String xpath) { 
     waitFor(xpath).press("Enter"); 
   }

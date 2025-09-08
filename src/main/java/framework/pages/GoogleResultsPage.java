@@ -8,9 +8,9 @@ import framework.core.BasePage;
 
 public class GoogleResultsPage extends BasePage {
 
-  private static final String SEARCH_RESULTS  = "//div[@id='search']";
-  private static final String CAREERS_LINK  = "(//a[@href=\"https://www.prometheusgroup.com/company/careers\"]";
-
+  private static final String SEARCH_RESULTS = "//div[@id='search']";
+  private static final String CAREERS_LINK = "//a[.='Careers']";  
+ 
   public GoogleResultsPage(Page page){ 
     super(page); 
 }
@@ -24,5 +24,5 @@ public class GoogleResultsPage extends BasePage {
     Locator link = waitFor(CAREERS_LINK); 
     link.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE));
     link.click();
-  }
+  } 
 }
