@@ -1,0 +1,52 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 (Temurin) and cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      # Cache Playwright browsers between runs (Java downloads to this folder on Linux)
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-msplaywright-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-msplaywright-
+
+      # Ensure the wrapper is executable (if you committed mvnw)
+      - name: Make mvnw executable
+        run: chmod +x mvnw || true
+
+      # Make sure tests run headless in CI even if your local config says false
+      - name: Force headless in CI
+        run: sed -i 's/headless=false/headless=true/' src/test/resources/config.properties || true
+
+      - name: Run tests
+        run: |
+          if [ -f "./mvnw" ]; then
+            ./mvnw -q -Dtest=PrometheusE2ETest test
+          else
+            mvn -q -Dtest=PrometheusE2ETest test
+          fi
+
+      # Upload JUnit/Surefire reports so you can view them in the Action run
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: "**/surefire-reports/**/*"
